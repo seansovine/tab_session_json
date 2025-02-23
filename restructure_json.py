@@ -12,7 +12,7 @@ import json
 
 def convert_window(win):
     """
-    The window is an object with sequential integer
+    Win is an object with sequential integer
     keys, and this converts it to a list of objects.
     """
 

@@ -18,7 +18,7 @@ use std::io;
 
 use serde_json;
 
-const FILE: &str = "/home/sean/Backup/362 Sessions - 2025-02-23 15-47-40.json";
+const FILE: &str = "scratch/out.json";
 
 fn main() {
   let file = fs::File::open(FILE).expect(&format!("Failed to read file: {}", FILE));
@@ -44,16 +44,18 @@ struct Session {
   #[serde(deserialize_with = "parse_date")]
   date: String,
 
-  #[serde(rename = "windows")]
-  _windows: Vec<Window>,
+  windows: Vec<Window>,
 }
 
 #[derive(Deserialize, Debug)]
 struct Window {
-  // Bummer, the JSON here is not formatted well for our purposes:
-  // It uses sequential integer keys where we would rather have a list
-  // entry. Maybe we can first write a quick Python script to convert
-  // the data, before calling this program to parse it.
+  tabs: Vec<Tab>,
+}
+
+#[derive(Deserialize, Debug)]
+struct Tab {
+  title: String,
+  url: String,
 }
 
 fn parse_date<'de, D>(deserializer: D) -> Result<String, D::Error>
