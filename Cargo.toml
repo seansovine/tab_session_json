@@ -1,0 +1,11 @@
+[package]
+name = "tab_session_json"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+chrono = "0.4.39"
+chrono-tz = "0.10.1"
+serde = "1.0.218"
+serde_derive = "1.0.218"
+serde_json = "1.0.139"
