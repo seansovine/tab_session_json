@@ -10,5 +10,5 @@ formatted_date=$(date -d "@$timestamp" +"%Y-%m-%d %H:%M:%S")
 echo $formatted_date
 
 ## NOTE: We used this to figure out that the timestamps in
-## the file are in milliseconds. We are timestamps expecting
+## the file are in milliseconds. We are expecting timestamps
 ## in seconds in our Rust code, so we will convert.
