@@ -11,7 +11,7 @@ use chrono::{TimeZone, Utc};
 use chrono_tz;
 
 use chrono_tz::US;
-use serde::{Deserialize, Deserializer, Serialize};
+use serde::{Deserialize, Deserializer};
 
 use std::cmp;
 use std::fs;
@@ -39,16 +39,8 @@ fn main() {
   });
 
   let export = Export { sessions };
-
-  let formatter = serde_json::ser::PrettyFormatter::with_indent(b"  ");
-  let mut buffer = Vec::new();
-  let mut serializer = serde_json::Serializer::with_formatter(&mut buffer, formatter);
-
-  export
-    .serialize(&mut serializer)
-    .expect("Failed to serialize data to JSON string.");
-  let string_data =
-    String::from_utf8(buffer).expect("Could not convert serialized data to string.");
+  let string_data = serde_json::to_string_pretty(&export)
+    .expect("Failed to serialize processed data using serde_json.");
 
   fs::write(OUT_FILE, string_data).expect("Failed to write processed data to file.");
 }
@@ -66,11 +58,9 @@ struct Export {
 struct Session {
   #[serde(rename = "name")]
   _name: String,
-
   // We parse unix timestamp to date + time.
   #[serde(deserialize_with = "parse_date")]
   date: String,
-
   windows: Vec<Window>,
 }
 
@@ -83,7 +73,7 @@ struct Window {
 struct Tab {
   title: String,
   url: String,
-
+  // We read this in to sort according to extension's order.
   #[serde(skip_serializing)]
   index: u64,
 }
