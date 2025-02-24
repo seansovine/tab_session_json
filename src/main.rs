@@ -11,31 +11,58 @@ use chrono::{TimeZone, Utc};
 use chrono_tz;
 
 use chrono_tz::US;
-use serde::{Deserialize, Deserializer};
+use serde::{Deserialize, Deserializer, Serialize};
 
+use std::cmp;
 use std::fs;
 use std::io;
 
 use serde_json;
 
-const FILE: &str = "scratch/out.json";
+const IN_FILE: &str = "scratch/input.json";
+const OUT_FILE: &str = "scratch/outut.json";
 
 fn main() {
-  let file = fs::File::open(FILE).expect(&format!("Failed to read file: {}", FILE));
+  let file = fs::File::open(IN_FILE).expect(&format!("Failed to read file: {}", IN_FILE));
   let reader = io::BufReader::new(file);
 
   let mut sessions: Vec<Session> =
     serde_json::from_reader(reader).expect("Failed to parse json with serde.");
-  sessions.sort_by_key(|entry| entry.date.clone());
 
-  println!("Found data:\n\n{:#?}", sessions);
+  // Sort sessions by date.
+  sessions.sort_by_key(|entry| cmp::Reverse(entry.date.clone()));
+  // Sort tabs in session by original index.
+  sessions.iter_mut().for_each(|session| {
+    session.windows.iter_mut().for_each(|window| {
+      window.tabs.sort_by_key(|tab| tab.index);
+    });
+  });
+
+  let export = Export { sessions };
+
+  let formatter = serde_json::ser::PrettyFormatter::with_indent(b"  ");
+  let mut buffer = Vec::new();
+  let mut serializer = serde_json::Serializer::with_formatter(&mut buffer, formatter);
+
+  export
+    .serialize(&mut serializer)
+    .expect("Failed to serialize data to JSON string.");
+  let string_data =
+    String::from_utf8(buffer).expect("Could not convert serialized data to string.");
+
+  fs::write(OUT_FILE, string_data).expect("Failed to write processed data to file.");
 }
 
 /////////////////////////////
 // Data struct definition. //
 /////////////////////////////
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
+struct Export {
+  sessions: Vec<Session>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 struct Session {
   #[serde(rename = "name")]
   _name: String,
@@ -47,15 +74,18 @@ struct Session {
   windows: Vec<Window>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 struct Window {
   tabs: Vec<Tab>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 struct Tab {
   title: String,
   url: String,
+
+  #[serde(skip_serializing)]
+  index: u64,
 }
 
 fn parse_date<'de, D>(deserializer: D) -> Result<String, D::Error>
