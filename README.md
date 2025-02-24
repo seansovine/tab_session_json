@@ -17,7 +17,7 @@ the Python for easier parsing with Serde.
 To apply the Python data reformat script, from project root:
 
 ```bash
-c && ./restructure_json.py --in-file "/home/sean/Backup/362 Sessions - 2025-02-23 15-47-40.json" --out-file scratch/input.json
+./restructure_json.py --in-file "/home/sean/Backup/362 Sessions - 2025-02-23 15-47-40.json" --out-file scratch/input.json
 ```
 
 Then to run the rust program on the output you can use:

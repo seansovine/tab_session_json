@@ -19,7 +19,9 @@ struct Args {
   out_file: String,
 }
 
-fn main() {
+fn main() -> Result<(), String> {
   let args = Args::parse();
-  data::process_data(&args.in_file, &args.out_file);
+  data::process_data(&args.in_file, &args.out_file)?;
+
+  Ok(())
 }
