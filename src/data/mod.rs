@@ -4,7 +4,6 @@ use chrono_tz::US;
 use serde::{Deserialize, Deserializer};
 
 use std::cmp;
-use std::fs;
 use std::io;
 
 use serde_json;
@@ -61,21 +60,16 @@ where
   Ok(eastern_date_time.to_string())
 }
 
-/// Read in JSON from file, process and simplify data,
-/// and write processed data to file.
+/// Reads in a Tab Session Manager export JSON file, processes
+/// and simplifies it, and returns the processed JSON string.
 ///
-/// * `in_file` - The path to the Tab Session Manager export JSON,
-///               after processing by our Python script.
+/// * `in_file` - An io::Read object for reading text
+///               from an input filr or other source.
 ///
-/// * `out_file` - The path at which to write the processed JSON file.
+/// If successful, returns a string containing the processed JSON.
 ///
-pub fn process_data(in_file: &str, out_file: &str) -> Result<(), String> {
-  let Ok(file) = fs::File::open(in_file) else {
-    return Err(format!("Failed to read file: {}", in_file));
-  };
-  let reader = io::BufReader::new(file);
-
-  let Ok(mut sessions): Result<Vec<Session>, _> = serde_json::from_reader(reader) else {
+pub fn process_data<R: io::Read>(in_reader: &mut R) -> Result<String, String> {
+  let Ok(mut sessions): Result<Vec<Session>, _> = serde_json::from_reader(in_reader) else {
     return Err("Failed to parse json.".to_owned());
   };
 
@@ -93,7 +87,5 @@ pub fn process_data(in_file: &str, out_file: &str) -> Result<(), String> {
     return Err("Failed to serialize processed data.".to_owned());
   };
 
-  fs::write(out_file, string_data).expect("Failed to write processed data to file.");
-
-  Ok(())
+  Ok(string_data)
 }

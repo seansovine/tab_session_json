@@ -12,7 +12,7 @@ The export JSON file has some objects that map `index -> key`,
 where the number of indices varies from object to object,
 and these are hard to specify when parsing using Serde.
 To handle this situation, we have a Python scipt that restructures
-the Python for easier parsing with Serde.
+the JSON for easier parsing with Serde.
 
 To apply the Python data reformat script, from project root:
 
@@ -35,6 +35,6 @@ Maybe just have the Rust program call the Python script. We
 could add a `build.rs` script to check for a Python interpreter,
 perhaps.
 
-As a side note, it would be nice to have a JSON API like Json for
+As a side note, it would be nice to have a JSON API like JSON for
 Modern C++ in Rust. It is able to flexibly handle JSON that is
 structured to have objects with varying keys, as this has.

@@ -11,6 +11,9 @@ mod data;
 
 use clap::Parser;
 
+use std::fs;
+use std::io;
+
 #[derive(Parser)]
 struct Args {
   #[clap(long)]
@@ -21,7 +24,14 @@ struct Args {
 
 fn main() -> Result<(), String> {
   let args = Args::parse();
-  data::process_data(&args.in_file, &args.out_file)?;
+
+  let Ok(file) = fs::File::open(&args.in_file) else {
+    return Err(format!("Failed to read file: {}", &args.in_file));
+  };
+  let mut reader = io::BufReader::new(file);
+
+  let out_string = data::process_data(&mut reader)?;
+  fs::write(&args.out_file, out_string).expect("Failed to write processed data to file.");
 
   Ok(())
 }
